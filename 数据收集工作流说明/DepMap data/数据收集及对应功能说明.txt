@@ -1,0 +1,57 @@
+✅ 一、DepMap 数据总览
+DepMap 提供的数据主要可以分为四类：
+
+类别	描述	推荐文件名关键词
+📊 Gene effect (CRISPR KO)	每个基因在每个细胞系中的 knock-out 效应	Achilles_gene_effect.csv
+🔬 RNAi gene effect	shRNA 干扰的效果数据	RNAi_gene_effect.csv
+🧬 Gene expression	各细胞系的 RNA-seq 表达数据	TPM.csv 或 expression.csv
+🧪 Sample info	细胞系的注释信息，如来源组织、突变	sample_info.csv 或 cell_line_metadata.csv
+🧬 Mutation calls	每个细胞系中检测到的突变情况	mutation_calls.csv
+🧬 CNV（拷贝数变化）	拷贝数变化分析	cnv_gene.csv 或 cnv_segment.csv
+✅ 二、项目下载的表格
+文件名（建议搜索关键词）	用途	关键词字段（下载后要看的）
+Achilles_gene_effect.csv	📌 构建 CRISPR KO 分值、inhibitor筛选机制特征	DepMap_ID, gene symbol, 每列是一个细胞系
+sample_info.csv or cell_line_metadata.csv	📌 筛选 KRAS-G12C 阳性细胞系（或肺癌背景）	lineage, primary_disease, mutations, DepMap_ID
+mutation_calls.csv	📌 找到含 KRAS G12C 的细胞系列表	Hugo_Symbol, Variant_Classification, DepMap_ID
+TPM.csv or expression.csv	📌 构建 RNAseq 表达变化特征	gene, 各个细胞系列
+RNAi_gene_effect.csv（可选）	📌 增强 KO 数据的稳定性参考	同 Achilles 结构
+cnv_gene.csv（可选）	📌 拷贝数与耐药因子的表达关联分析	gene, DepMap_ID, 拷贝数
+✅ 三、关键词速查索引表（字段关键词）
+ToDo	            What For
+找 KRAS-G12C 细胞系	Hugo_Symbol == KRAS & Variant == G12C
+获取 KO 分数	Achilles_gene_effect.csv 中列名为 DepMap_ID 所对应的值
+过滤肺癌细胞系	lineage == lung / primary_disease == NSCLC
+融合表达和突变	DepMap_ID 是所有表的主键，必须一致
+构建一致性评分	针对某基因跨多个 KRAS-G12C 样本取 mean() 或 sd()
+✅ 四、操作
+访问网址：https://depmap.org/portal/download/
+
+在页面中点击 “22Q4 Public”（或其他版本）
+
+搜索以下关键词：
+
+Achilles
+
+metadata / sample_info
+
+mutation
+
+TPM 或 expression
+
+cnv
+
+点击右边的 “CSV” 图标下载文件
+
+📦 补充建议
+特殊用途	建议额外下载的资源
+想看特定药物处理下的筛选结果	PRISM Repurposing 数据集（药物反应）
+想看转录组反应一致性	LINCS 1000 landmark expression
+文件名	                    重要性 	用途说明	推荐系统字段
+CRISPR_gene_effect.csv ✅	绝对必须	主力构建 KO 一致性、gene effect 分数	crispr_consistency, crisprn_total, crisprn_ada 等
+CRISPR_gene_dependency.csv ✅	可选增强	表示基因依赖性概率（更保守）	可增强 crispr_consistency 的稳定性
+CCLE_expression.csv ✅	强烈推荐	所有细胞系的 RNA TPM 表达量	RNAseq_LFC, RNAseq_adjpval
+CCLE_gene_cn.csv 🟡	可选（简版）	基因层级拷贝数数据	可用于解释某些耐药因子的染色体放大机制
+CCLE_wes_gene_cn.csv 🟡	可选（WES版）	同上，但来自 WES 数据	同上，二选一即可
+CCLE_mutations.csv ✅	必需	突变注释文件，判断是否 KRAS G12C	构建 KRAS_G12C_positive_samples 子集
+sample_info.csv ✅	必需	细胞系 metadata，包含组织来源、DepMap_ID	用于联合筛选 “NSCLC” + “KRAS G12C”
+Achilles_metadata.csv 🟡	可选	项目级注释文件	补充分析/整理 CRISPR 项目特征标签时使用

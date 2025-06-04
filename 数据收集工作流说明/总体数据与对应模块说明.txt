@@ -1,0 +1,63 @@
+✅ 总体目标导向
+我们为 KRAS-G12C耐药机制推荐系统 所需的特征/模块分为：
+
+目标函数维度	用途说明	是否已有（你的CSV）
+📖 文献支持性	NLP词频、共现、摘要嵌入	✅（已有基础）
+🧬 生物实验支持	CRISPR数据、RNAseq表达	❌（需补充）
+🔁 通路逻辑结构	上下游调控、反馈回路	❌（需补充）
+🎯 可成药性指标	是否可被药物靶向	❌（需补充）
+⚕️ 临床证据	responder vs resistant 富集	❌（需补充）
+🌐 图谱结构特征	中心性、邻接数、距离	❌（需补充）
+📊 所需数据源一览表
+数据来源	类型	数据维度	主要用途	工具/API
+DepMap✅（4.10完成：收集CCLE数据和CRISPR数据，并用CCLE数据完成RNAseq基因特征提取，用CRISPR数据完成CRISPR Top 候选基因分析） / Project Score	实验	CRISPR KO, gene effect score	构建“耐药潜势”分值/一致性指标	depmap R package / download portal
+TCGA / CPTAC / CCLE	实验	RNAseq表达，mutations	构建表达变化特征，如 LFC / adj.P	GDC API / TCGAbiolinks / UCSC Xena
+PubTator / Entrez API	文献	文献共现，关键词匹配	文献频率、共现比率、摘要抓取	rentrez / PubTator API
+OpenTargets	靶点	基因-疾病-药物关联评分	可成药性特征提取	GraphQL / CSV bulk 下载
+DrugBank / ChEMBL	靶点	Small molecule / 抗体靶点信息	trct_sm / trct_ab 特征构建	REST API / chembl_webresource
+STRING / BioGRID / IntAct	图谱	PPI, pathway网络结构	节点中心性，邻接度，图距离	STRINGdb / BioGRID API / Cytoscape
+Reactome / KEGG	通路	MAPK/RAS相关路径	机制解释、分类、路径打分	graphite / Reactome API
+cBioPortal / ICGC	临床	患者突变频率、反应性分析	构建 clinical enrichment scores	cgdsr / web downloader
+Pathway Commons	综合	Gene-pathway-event 结构图	构建知识图谱基本关系	pathwaycommons.org download
+BioBERT / PubMedBERT	NLP	基因摘要嵌入	融合文本语义表示进入GNN	transformers (Huggingface)
+Hetionet / BIKG	多元图谱	Gene–Disease–Drug–Pathway 关系图	node2vec/node embeddings特征	Neo4j / hetionet-kg dump
+🧠 模块-数据源-目标函数三者关系表
+模块	数据源	支持的特征/指标
+文献共现矩阵 + 嵌入	你已提供CSV + PubTator	obj_4–8（共现频次、比率、摘要语义）
+CRISPR KO评分	DepMap / Project Score	obj_16–22（KO一致性、full screen）
+表达变化	TCGA / CPTAC / CCLE	obj_26–27（RNAseq log2FC / padj）
+图谱中心性	STRING / BioGRID / Hetionet	obj_11–15（邻居数、degree、pagerank）
+图谱嵌入距离	Hetionet / 自构图谱 + node2vec	obj_9–10（L2距离到KRAS_G12C/NSCLC）
+药物可成药性	ChEMBL / OpenTargets / DrugBank	obj_1–3（trct_ab, trct_sm, trct_om）
+临床富集度	cBioPortal / CodeBreaK / KRYSTAL	obj_23–25（responder vs resistant enrichment）
+✅ 每类数据如何构建特征（示例）
+特征列名	数据来源	说明
+L2_kras	node2vec on KG	从图谱中计算KRAS-G12C节点的L2距离
+pagerank	STRING PPI图	用作图中“传播能力”衡量
+trct_sm	DrugBank	是否已有小分子靶向药物
+clin_ES1	KRYSTAL/CodeBreaK	responder vs resistant中基因变异频率
+RNAseq_LFC	TCGA LUAD	log2FoldChange（突变组vs对照）
+crispr_score	DepMap	KO后细胞活性变化得分
+lit_kras_freq	你上传的CSV	与KRAS G12C相关共现频次
+bert_embed_mean	BioBERT嵌入	文献摘要的嵌入向量均值
+✅ 数据整合脚本规划
+我可以帮你写这些脚本：
+
+脚本	功能	所用语言
+build_graph_from_string.py	从 STRING/BioGRID 构建 NetworkX 图	Python
+get_depmap_scores.R	下载并整理 CRISPR KO 数据	R
+pubmed_summary_fetcher.py	从 PubMed 下载摘要 + BioBERT嵌入	Python
+node2vec_embedding.py	对自建知识图谱做嵌入计算	Python
+feature_matrix_constructor.R	拼接所有特征矩阵为 app_data_kras.csv	R/Python
+📣 总结
+你现在已完成“文本特征维度”这一大模块，而剩下的支撑推荐系统的模块主要包括：
+
+CRISPR实验评分（DepMap）
+
+表达变化（TCGA/CCLE）
+
+图谱结构特征（中心性/距离）
+
+可成药性（DrugBank/ChEMBL）
+
+临床富集（cBioPortal/CodeBreaK）

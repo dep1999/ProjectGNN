@@ -1,0 +1,79 @@
+✅ 一、字段结构是推荐系统的“特征向量表”
+我们为每一个候选基因（gene）建立一行数据，
+每一列字段就是该基因的一个**“多模态特征”**，
+最终将这个表格作为推荐系统的输入，送入 SkywalkR、LightGBM 或 GNN 模型中进行多目标排序。
+
+举例：
+
+gene	lit_kras_freq	L2_kras	trct_sm	crispr_consistency	clin_ES1	RNAseq_LFC
+DUSP6	112	0.432	1	0.87	0.66	1.45
+AURKA	98	0.667	1	0.74	0.23	-0.54
+这张表会被用作 SkywalkR 的 app_data.csv 主输入。
+
+✅ 二、你该如何使用这个字段结构
+🧩 用法一：作为数据整理的“蓝图”
+你可以按字段解释表（app_data_kras_field_description.csv）：
+
+针对每一个字段，从不同数据库中下载/处理数据
+
+整理成 gene × 特征 格式（即每行一个基因）
+
+例如：
+
+字段	数据来源	处理方式
+lit_kras_freq	PubTator/你已有文献矩阵	每个基因出现在“KRAS G12C”上下文中的次数
+L2_kras	node2vec embedding	计算当前节点到 KRAS-G12C 节点的欧几里得距离
+crispr_consistency	DepMap	多个细胞系 KO 一致性平均值
+trct_sm	DrugBank / OpenTargets	若有小分子靶点则为 1，否则为 0
+✅ 可直接填表的方式：
+可在 Excel/CSV 中逐行填写（每列一个特征）
+
+也可以使用 R/Python 脚本自动拼接（我可以提供）
+
+✅ 三、如何将它送入 SkywalkR 使用？
+1. 替换原始输入文件
+你只需要：
+
+bash
+复制
+编辑
+mv app_data_kras.csv ./data/app_data.csv
+SkywalkR 默认读取路径为：
+
+r
+复制
+编辑
+DATA <- read_csv('data/app_data.csv')
+2. 对字段名无需变更，保持与UI代码一致即可：
+如：
+
+r
+复制
+编辑
+sliderTextInput01("obj_27", "RNAseq, log2 fold change", "high")
+→ 会自动匹配 RNAseq_LFC 这一列字段
+
+✅ 四、常见场景与灵活操作
+需求	操作方法
+🔧 没有某些字段的数据？	可以临时填NA；SkywalkR只用到你设为high/low/exclude的字段
+➕ 想增加新字段？	在 UI 和 pareto_helper() 中注册对应 slider（我可帮你改）
+➖ 想只用10个字段？	删除其它列，SkywalkR依旧可运行，只需匹配 TOTAL_OBJECTIVES 数
+✅ 五、建议的使用流程（推荐）
+mermaid
+复制
+编辑
+flowchart TD
+A[确定字段结构] --> B[收集每列字段数据]
+B --> C[整合为gene × 特征表]
+C --> D[保存为 app_data_kras.csv]
+D --> E[替换到 SkywalkR 的 data/app_data.csv]
+E --> F[UI界面运行推荐]
+✅ 六、我能为你做什么？
+我可以：
+
+帮你编写填充这些字段的自动脚本
+
+替你修改 SkywalkR，使其适配你新增/删减字段
+
+一步步带你测试推荐流程与结果解释
+
