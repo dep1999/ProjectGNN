@@ -1,0 +1,23 @@
+# KRAS G12C突变型癌症耐药基因预测系统依赖包
+
+# 基础科学计算包
+numpy>=1.19.0
+pandas>=1.1.0
+scipy>=1.5.0
+scikit-learn>=0.23.0
+matplotlib>=3.3.0
+
+# 深度学习框架
+torch>=1.9.0
+
+# 图神经网络库
+torch-geometric>=2.0.0
+torch-scatter>=2.0.8
+torch-sparse>=0.6.12
+
+# 图分析和可视化
+networkx>=2.5.0
+
+# 其他工具
+tqdm>=4.50.0
+argparse>=1.4.0
